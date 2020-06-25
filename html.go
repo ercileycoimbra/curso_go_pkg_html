@@ -8,7 +8,7 @@ import (
 
 // Titulo obtem o título de uma janela html
 func Titulo(urls ...string) <-chan string {
-	c := make(chan string) 
+	c := make(chan string)
 
 	for _, url := range urls {
 		go func(cUrl string) {
@@ -16,7 +16,14 @@ func Titulo(urls ...string) <-chan string {
 			html, _ := ioutil.ReadAll(resp.Body)
 
 			r, _ := regexp.Compile("<title>(.*?)<\\/title>")
-			c <- r.FindStringSubmatch(string(html))[1]
+			aRetorno := r.FindStringSubmatch(string(html))
+
+			if cap(aRetorno) == 0 {
+				c <- "Erro ao ler página " + cUrl
+				return
+			}
+
+			c <- aRetorno[1]
 		}(url)
 	}
 
